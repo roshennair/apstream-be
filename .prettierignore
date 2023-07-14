@@ -1,0 +1,17 @@
+# Ignore artifacts:
+/node_modules
+/dist
+/.nyc_output
+/coverage
+
+# Ignore all log files:
+*.log
+
+# Ignore package-lock.json in case it gets auto-formatted on npm install:
+package-lock.json
+
+# Ignore .env files which might contain sensitive data:
+.env
+
+# Ignore any auto-generated API documentation:
+/docs

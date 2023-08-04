@@ -2,6 +2,7 @@ import RedisStore from 'connect-redis';
 import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
+import morgan from 'morgan';
 import { createClient } from 'redis';
 import authRouter from './routers/auth';
 import userRouter from './routers/user';
@@ -32,6 +33,7 @@ app.use(
 	})
 );
 app.use(express.json());
+app.use(morgan('dev'));
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);

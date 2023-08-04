@@ -1,12 +1,41 @@
-import express, { Request, Response } from 'express';
+import RedisStore from 'connect-redis';
+import 'dotenv/config';
+import express from 'express';
+import session from 'express-session';
+import { createClient } from 'redis';
+import authRouter from './routers/auth';
+import userRouter from './routers/user';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT ?? 3001;
 
-app.get('/', (_req: Request, res: Response) => {
-	res.send('Your mom!');
-});
+const redisClient = createClient();
+redisClient.connect().catch(console.error);
+
+declare module 'express-session' {
+	interface SessionData {
+		userId: string;
+	}
+}
+
+app.use(
+	session({
+		store: new RedisStore({ client: redisClient }),
+		secret: process.env.SESSION_SECRET ?? 'secret',
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			secure: false,
+			httpOnly: false,
+			maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days in milliseconds
+		},
+	})
+);
+app.use(express.json());
+
+app.use('/auth', authRouter);
+app.use('/user', userRouter);
 
 app.listen(port, () => {
-	console.log(`Server running at http://localhost:${port}`);
+	console.log(`APStream server is listening on port ${process.env.PORT}`);
 });

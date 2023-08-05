@@ -1,4 +1,5 @@
 import RedisStore from 'connect-redis';
+import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
@@ -19,6 +20,13 @@ declare module 'express-session' {
 	}
 }
 
+app.use(
+	cors({
+		origin: process.env.CLIENT_URL ?? 'http://localhost:3000',
+		optionsSuccessStatus: 200,
+		credentials: true,
+	})
+);
 app.use(
 	session({
 		store: new RedisStore({ client: redisClient }),

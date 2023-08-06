@@ -1,23 +1,38 @@
 import { Request, Response, Router } from 'express';
-import { createUser, getUserByEmail, getUserById } from '../db';
+import { createUser, getAllUsers, getUserByEmail, getUserById } from '../db';
 import { isAdmin } from '../middleware';
 import type { NewUserDetails } from '../types/user';
 
 const userRouter = Router();
 
 userRouter.get('/', async (req: Request, res: Response) => {
-	const { userId } = req.session;
+	try {
+		const users = await getAllUsers();
+		res.status(200).json({ users });
+	} catch (err) {
+		res.status(500).json({ error: 'Failed to get all users' });
+	}
+});
 
-	if (!userId || userId.length === 0) {
-		return res.status(401).json({ error: 'Not logged in' });
+userRouter.get('/:id', async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	let userId: string;
+	if (id === 'me') {
+		if (!req.session.userId) {
+			return res.status(401).json({ error: 'Not logged in' });
+		}
+		userId = req.session.userId;
+	} else {
+		userId = id;
 	}
 
 	try {
 		const user = await getUserById(userId);
 		if (!user) {
-			return res.status(401).json({ error: 'Invalid credentials' });
+			return res.status(404).json({ error: 'User not found' });
 		}
-		res.status(200).json({ self: user });
+		res.status(200).json({ user });
 	} catch (err) {
 		res.status(500).json({ error: 'Failed to get user' });
 	}

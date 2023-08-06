@@ -72,3 +72,26 @@ export const createUser = async (userDetails: NewUserDetails) => {
 		throw new Error(`Failed to create user ${userDetails.email}`);
 	}
 };
+
+export const getAllUsers = async () => {
+	try {
+		const [rows] = (await pool.query(
+			'SELECT * FROM user ORDER BY created_at DESC'
+		)) as RowDataPacket[];
+		const users: User[] = rows.map((userRow: any) => {
+			const user: User = {
+				id: userRow.id,
+				email: userRow.email,
+				hashedPassword: userRow.hashed_password,
+				createdAt: userRow.created_at,
+				updatedAt: userRow.updated_at,
+				userType: userRow.user_type,
+				fullName: userRow.full_name,
+			};
+			return user;
+		});
+		return users;
+	} catch {
+		throw new Error('Failed to get all users');
+	}
+};

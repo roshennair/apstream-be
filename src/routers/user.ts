@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { createUser, getUserByEmail, getUserById } from '../db';
+import { isAdmin } from '../middleware';
 import type { NewUserDetails } from '../types/user';
 
 const userRouter = Router();
@@ -22,7 +23,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
 	}
 });
 
-userRouter.post('/', async (req: Request, res: Response) => {
+userRouter.post('/', isAdmin, async (req: Request, res: Response) => {
 	const userDetails = req.body as NewUserDetails;
 
 	if (

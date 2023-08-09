@@ -5,6 +5,8 @@ import express from 'express';
 import session from 'express-session';
 import morgan from 'morgan';
 import { createClient } from 'redis';
+import { getMetrics } from './db';
+import { isAdmin } from './middleware';
 import authRouter from './routers/auth';
 import moduleRouter from './routers/module';
 import searchRouter from './routers/search';
@@ -49,6 +51,15 @@ app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/module', moduleRouter);
 app.use('/search', searchRouter);
+
+app.get('/metrics', isAdmin, async (_req, res) => {
+	try {
+		const metrics = await getMetrics();
+		res.status(200).json({ metrics });
+	} catch (err) {
+		res.status(500).json({ error: (err as Error).message });
+	}
+});
 
 app.listen(port, () => {
 	console.log(`APStream server is listening on port ${process.env.PORT}`);

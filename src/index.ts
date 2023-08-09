@@ -6,6 +6,8 @@ import session from 'express-session';
 import morgan from 'morgan';
 import { createClient } from 'redis';
 import authRouter from './routers/auth';
+import moduleRouter from './routers/module';
+import searchRouter from './routers/search';
 import userRouter from './routers/user';
 
 const app = express();
@@ -45,6 +47,8 @@ app.use(morgan('dev'));
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/module', moduleRouter);
+app.use('/search', searchRouter);
 
 app.listen(port, () => {
 	console.log(`APStream server is listening on port ${process.env.PORT}`);

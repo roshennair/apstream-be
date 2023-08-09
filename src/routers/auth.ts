@@ -1,6 +1,6 @@
 import { compare } from 'bcrypt';
 import { Request, Response, Router } from 'express';
-import { getUserByEmail } from '../db';
+import { getUserByEmail } from '../db/user';
 import type { LoginParams } from '../types/auth';
 
 const authRouter = Router();

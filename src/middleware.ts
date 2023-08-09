@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { getUserById } from './db';
+import { getUserById } from './db/user';
 
 export const isAdmin = async (
 	req: Request,

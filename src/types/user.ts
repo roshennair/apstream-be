@@ -8,7 +8,7 @@ export type User = {
 	fullName: string;
 };
 
-export type NewUserDetails = {
+export type NewUser = {
 	email: string;
 	password: string;
 	fullName: string;

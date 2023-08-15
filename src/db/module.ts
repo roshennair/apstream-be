@@ -80,3 +80,24 @@ export const createModule = async (newModule: NewModule) => {
 		throw new Error(`Failed to create module ${newModule.code}`);
 	}
 };
+
+export const getModulesByUserId = async (userId: string) => {
+	try {
+		const [rows] = (await db.query(
+			`SELECT * FROM module WHERE id IN (SELECT module_id FROM user_module WHERE user_id = ?) ORDER BY created_at DESC`,
+			[userId]
+		)) as RowDataPacket[];
+		const modules: Module[] = rows.map((moduleRow: any) => {
+			return {
+				id: moduleRow.id,
+				name: moduleRow.name,
+				code: moduleRow.code,
+				createdAt: moduleRow.created_at,
+				updatedAt: moduleRow.updated_at,
+			};
+		});
+		return modules;
+	} catch {
+		throw new Error(`Failed to get modules by user ID ${userId}`);
+	}
+};

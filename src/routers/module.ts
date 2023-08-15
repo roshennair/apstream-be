@@ -1,9 +1,11 @@
 import { Request, Response, Router } from 'express';
+import { getLecturesByModuleId } from '../db/lecture';
 import {
 	createModule,
 	getAllModules,
 	getModuleByCode,
 	getModuleById,
+	getModulesByUserId,
 } from '../db/module';
 import {
 	assignUserToModule,
@@ -18,6 +20,21 @@ const moduleRouter = Router();
 moduleRouter.get('/', async (_req: Request, res: Response) => {
 	try {
 		const modules = await getAllModules();
+		res.status(200).json({ modules });
+	} catch (err) {
+		res.status(500).json({ error: (err as Error).message });
+	}
+});
+
+moduleRouter.get('/assigned', async (req: Request, res: Response) => {
+	const { userId } = req.session;
+
+	if (!userId) {
+		return res.status(401).json({ error: 'Not logged in' });
+	}
+
+	try {
+		const modules = await getModulesByUserId(userId);
 		res.status(200).json({ modules });
 	} catch (err) {
 		res.status(500).json({ error: (err as Error).message });
@@ -103,5 +120,17 @@ moduleRouter.post(
 		}
 	}
 );
+
+moduleRouter.get('/:moduleId/lectures', async (req: Request, res: Response) => {
+	const { moduleId } = req.params;
+
+	try {
+		const lectures = await getLecturesByModuleId(moduleId);
+		res.status(200).json({ lectures });
+	} catch (err) {
+		res.status(500).json({ error: (err as Error).message });
+	}
+	return;
+});
 
 export default moduleRouter;

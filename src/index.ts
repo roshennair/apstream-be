@@ -8,6 +8,8 @@ import { createClient } from 'redis';
 import { getMetrics } from './db';
 import { isAdmin } from './middleware';
 import authRouter from './routers/auth';
+import commentRouter from './routers/comment';
+import lectureRouter from './routers/lecture';
 import moduleRouter from './routers/module';
 import searchRouter from './routers/search';
 import userRouter from './routers/user';
@@ -51,6 +53,8 @@ app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/module', moduleRouter);
 app.use('/search', searchRouter);
+app.use('/lecture', lectureRouter);
+app.use('/comment', commentRouter);
 
 app.get('/metrics', isAdmin, async (_req, res) => {
 	try {

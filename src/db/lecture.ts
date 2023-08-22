@@ -1,5 +1,6 @@
+import { randomUUID } from 'crypto';
 import { RowDataPacket } from 'mysql2';
-import type { Lecture } from '../types/lecture';
+import type { Lecture, NewLecture } from '../types/lecture';
 import db from './';
 
 export const getLecturesByModuleId = async (moduleId: string) => {
@@ -61,4 +62,44 @@ export const getLectureById = async (id: string) => {
 	} catch {
 		throw new Error(`Failed to get lecture by ID ${id}`);
 	}
+};
+
+export const createLecture = async (newLecture: NewLecture) => {
+	const lectureId = randomUUID();
+
+	try {
+		await db.query(
+			`INSERT INTO lecture (id, module_id, video_id, title, description, duration_seconds) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+			[
+				lectureId,
+				newLecture.moduleId,
+				newLecture.videoId,
+				newLecture.title,
+				newLecture.description,
+				newLecture.durationSeconds,
+			]
+		);
+	} catch {
+		throw new Error(
+			`Failed to create lecture with title ${newLecture.title}`
+		);
+	}
+
+	try {
+		const tags = newLecture.tags.split(',');
+		for (const tagName of tags) {
+			const tagId = randomUUID();
+			await db.query(
+				`INSERT INTO lecture_tag (id, lecture_id, name) VALUES (?, ?, ?)`,
+				[tagId, lectureId, tagName.trim()]
+			);
+		}
+	} catch {
+		throw new Error(
+			`Failed to create lecture tags for lecture with ID ${lectureId}`
+		);
+	}
+
+	return lectureId;
 };

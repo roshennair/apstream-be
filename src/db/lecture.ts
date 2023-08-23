@@ -54,9 +54,9 @@ export const getLectureById = async (id: string) => {
 			title: lectureRow.title,
 			description: lectureRow.description,
 			durationSeconds: lectureRow.duration_seconds,
+			tags: lectureRow.tags ? lectureRow.tags.split(',') : [],
 			createdAt: lectureRow.created_at,
 			updatedAt: lectureRow.updated_at,
-			tags: lectureRow.tags ? lectureRow.tags.split(',') : [],
 		};
 		return lecture;
 	} catch {
@@ -102,4 +102,51 @@ export const createLecture = async (newLecture: NewLecture) => {
 	}
 
 	return lectureId;
+};
+
+const fetchLecturesByQueryWord = async (queryWord: string) => {
+	const [rows] = (await db.query(
+		`SELECT lecture.*, GROUP_CONCAT(lecture_tag.name) AS tags
+            FROM lecture LEFT JOIN lecture_tag
+            ON lecture.id = lecture_tag.lecture_id
+            WHERE lecture.title LIKE CONCAT('%', ?, '%')
+            OR lecture.description LIKE CONCAT('%', ?, '%')
+            OR lecture_tag.name LIKE CONCAT('%', ?, '%')
+            GROUP BY lecture.id
+            ORDER BY lecture.created_at DESC;`,
+		[queryWord, queryWord, queryWord]
+	)) as RowDataPacket[];
+	const lectures: Lecture[] = rows.map((lectureRow: any) => {
+		return {
+			id: lectureRow.id,
+			moduleId: lectureRow.module_id,
+			videoId: lectureRow.video_id,
+			title: lectureRow.title,
+			description: lectureRow.description,
+			durationSeconds: lectureRow.duration_seconds,
+			createdAt: lectureRow.created_at,
+			updatedAt: lectureRow.updated_at,
+			tags: lectureRow.tags ? lectureRow.tags.split(',') : [],
+		};
+	});
+	return lectures;
+};
+
+export const searchLectures = async (query: string) => {
+	try {
+		const queryWords = query
+			.split(' ')
+			.filter((word) => word.trim() !== '');
+		const uniqueLecturesMap = new Map<string, Lecture>();
+		for (const word of queryWords) {
+			const lectures = await fetchLecturesByQueryWord(word);
+			for (const lecture of lectures) {
+				uniqueLecturesMap.set(lecture.id, lecture);
+			}
+		}
+		const matchingLectures = Array.from(uniqueLecturesMap.values());
+		return matchingLectures;
+	} catch {
+		throw new Error(`Failed to search for lectures with query ${query}`);
+	}
 };

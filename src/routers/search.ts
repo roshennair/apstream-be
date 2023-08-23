@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { searchLecturersUnassignedToModule, searchStudentsUnassignedToModule } from '../db/user';
+import { searchLectures } from '../db/lecture';
+import {
+	searchLecturersUnassignedToModule,
+	searchStudentsUnassignedToModule,
+} from '../db/user';
 
 const searchRouter = Router();
 
@@ -36,6 +40,21 @@ searchRouter.get('/users/students/unassigned/:moduleId', async (req, res) => {
 			moduleId as string
 		);
 		res.status(200).json({ students });
+	} catch (err) {
+		res.status(500).json({ error: (err as Error).message });
+	}
+});
+
+searchRouter.get('/lectures', async (req, res) => {
+	const { q: searchQuery } = req.query;
+
+	if (!searchQuery) {
+		return res.status(400).json({ error: 'Missing required fields' });
+	}
+
+	try {
+		const lectures = await searchLectures(searchQuery as string);
+		res.status(200).json({ lectures });
 	} catch (err) {
 		res.status(500).json({ error: (err as Error).message });
 	}

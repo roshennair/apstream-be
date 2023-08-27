@@ -104,17 +104,18 @@ export const createLecture = async (newLecture: NewLecture) => {
 	return lectureId;
 };
 
-const fetchLecturesByQueryWord = async (queryWord: string) => {
+const fetchLecturesByQueryWord = async (queryWord: string, userId: string) => {
 	const [rows] = (await db.query(
 		`SELECT lecture.*, GROUP_CONCAT(lecture_tag.name) AS tags
-            FROM lecture LEFT JOIN lecture_tag
-            ON lecture.id = lecture_tag.lecture_id
-            WHERE lecture.title LIKE CONCAT('%', ?, '%')
+            FROM lecture LEFT JOIN lecture_tag ON lecture.id = lecture_tag.lecture_id
+            INNER JOIN user_module ON lecture.module_id = user_module.module_id
+            WHERE user_module.user_id = ? 
+            AND (lecture.title LIKE CONCAT('%', ?, '%')
             OR lecture.description LIKE CONCAT('%', ?, '%')
-            OR lecture_tag.name LIKE CONCAT('%', ?, '%')
+            OR lecture_tag.name LIKE CONCAT('%', ?, '%'))
             GROUP BY lecture.id
             ORDER BY lecture.created_at DESC;`,
-		[queryWord, queryWord, queryWord]
+		[userId, queryWord, queryWord, queryWord]
 	)) as RowDataPacket[];
 	const lectures: Lecture[] = rows.map((lectureRow: any) => {
 		return {
@@ -132,14 +133,14 @@ const fetchLecturesByQueryWord = async (queryWord: string) => {
 	return lectures;
 };
 
-export const searchLectures = async (query: string) => {
+export const searchLectures = async (query: string, userId: string) => {
 	try {
 		const queryWords = query
 			.split(' ')
 			.filter((word) => word.trim() !== '');
 		const uniqueLecturesMap = new Map<string, Lecture>();
 		for (const word of queryWords) {
-			const lectures = await fetchLecturesByQueryWord(word);
+			const lectures = await fetchLecturesByQueryWord(word, userId);
 			for (const lecture of lectures) {
 				uniqueLecturesMap.set(lecture.id, lecture);
 			}

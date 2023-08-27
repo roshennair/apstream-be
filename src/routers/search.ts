@@ -47,13 +47,18 @@ searchRouter.get('/users/students/unassigned/:moduleId', async (req, res) => {
 
 searchRouter.get('/lectures', async (req, res) => {
 	const { q: searchQuery } = req.query;
+	const { userId } = req.session;
 
 	if (!searchQuery) {
 		return res.status(400).json({ error: 'Missing required fields' });
 	}
 
+	if (!userId) {
+		return res.status(401).json({ error: 'Unauthorized' });
+	}
+
 	try {
-		const lectures = await searchLectures(searchQuery as string);
+		const lectures = await searchLectures(searchQuery as string, userId);
 		res.status(200).json({ lectures });
 	} catch (err) {
 		res.status(500).json({ error: (err as Error).message });

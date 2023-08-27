@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { getCommentsByLectureId } from '../db/comment';
 import { createLecture, getLectureById } from '../db/lecture';
+import { getNote } from '../db/note';
 import { BunnyCreateVideoResponse, NewLecture } from '../types/lecture';
 
 const lectureRouter = Router();
@@ -36,6 +37,25 @@ lectureRouter.get(
 		}
 	}
 );
+
+lectureRouter.get('/:lectureId/note', async (req: Request, res: Response) => {
+	const { lectureId } = req.params;
+	const { userId } = req.session;
+
+	if (!userId) {
+		return res.status(401).json({ error: 'Not logged in' });
+	}
+
+	try {
+		const note = await getNote({
+			userId,
+			lectureId,
+		});
+		res.status(200).json({ note });
+	} catch (err) {
+		res.status(500).json({ error: (err as Error).message });
+	}
+});
 
 lectureRouter.post('/', async (req: Request, res: Response) => {
 	const newLecture = req.body as NewLecture;

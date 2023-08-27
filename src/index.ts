@@ -11,6 +11,7 @@ import authRouter from './routers/auth';
 import commentRouter from './routers/comment';
 import lectureRouter from './routers/lecture';
 import moduleRouter from './routers/module';
+import noteRouter from './routers/note';
 import searchRouter from './routers/search';
 import userRouter from './routers/user';
 
@@ -55,6 +56,7 @@ app.use('/module', moduleRouter);
 app.use('/search', searchRouter);
 app.use('/lecture', lectureRouter);
 app.use('/comment', commentRouter);
+app.use('/note', noteRouter);
 
 app.get('/metrics', isAdmin, async (_req, res) => {
 	try {

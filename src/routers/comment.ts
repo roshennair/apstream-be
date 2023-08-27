@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createComment, deleteComment } from '../db/comment';
+import { deleteComment, setComment } from '../db/comment';
 
 const commentRouter = Router();
 
@@ -13,7 +13,7 @@ commentRouter.post('/', async (req, res) => {
 	}
 
 	try {
-		await createComment({
+		await setComment({
 			content: req.body.content,
 			lectureId: req.body.lectureId,
 			userId: req.session.userId,

@@ -30,17 +30,17 @@ export const getCommentsByLectureId = async (lectureId: string) => {
 	}
 };
 
-export const createComment = async (newComment: NewComment) => {
+export const setComment = async (newComment: NewComment) => {
 	const id = randomUUID();
 	try {
 		await db.query(
-			`INSERT INTO lecture_comment (id, lecture_id, parent_id, user_id, content)
-            VALUES (?, ?, ?, ?, ?)`,
+			`INSERT INTO lecture_comment (id, lecture_id, parent_id, user_id, content) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE content = ?`,
 			[
 				id,
 				newComment.lectureId,
 				newComment.parentId,
 				newComment.userId,
+				newComment.content,
 				newComment.content,
 			]
 		);

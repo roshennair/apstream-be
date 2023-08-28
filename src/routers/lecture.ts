@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { getBookmarks } from '../db/bookmark';
 import { getCommentsByLectureId } from '../db/comment';
 import { createLecture, getLectureById } from '../db/lecture';
 import { getNote } from '../db/note';
@@ -56,6 +57,28 @@ lectureRouter.get('/:lectureId/note', async (req: Request, res: Response) => {
 		res.status(500).json({ error: (err as Error).message });
 	}
 });
+
+lectureRouter.get(
+	'/:lectureId/bookmarks',
+	async (req: Request, res: Response) => {
+		const { lectureId } = req.params;
+		const { userId } = req.session;
+
+		if (!userId) {
+			return res.status(401).json({ error: 'Not logged in' });
+		}
+
+		try {
+			const bookmarks = await getBookmarks({
+				userId,
+				lectureId,
+			});
+			res.status(200).json({ bookmarks });
+		} catch (err) {
+			res.status(500).json({ error: (err as Error).message });
+		}
+	}
+);
 
 lectureRouter.post('/', async (req: Request, res: Response) => {
 	const newLecture = req.body as NewLecture;

@@ -14,6 +14,7 @@ import moduleRouter from './routers/module';
 import noteRouter from './routers/note';
 import searchRouter from './routers/search';
 import userRouter from './routers/user';
+import bookmarkRouter from './routers/bookmark';
 
 const app = express();
 const port = process.env.PORT ?? 3001;
@@ -57,6 +58,7 @@ app.use('/search', searchRouter);
 app.use('/lecture', lectureRouter);
 app.use('/comment', commentRouter);
 app.use('/note', noteRouter);
+app.use('/bookmark', bookmarkRouter);
 
 app.get('/metrics', isAdmin, async (_req, res) => {
 	try {
